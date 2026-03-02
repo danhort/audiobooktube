@@ -19,6 +19,7 @@ RUN npm run build
 FROM node:20-alpine
 
 RUN apk update && apk add --no-cache \
+    bash \
     build-base python3 py3-pip \
     ffmpeg \
     ca-certificates \
@@ -29,7 +30,11 @@ RUN pip install packaging --break-system-packages
 RUN pip install https://github.com/yt-dlp/yt-dlp/archive/master.zip --break-system-packages
 
 COPY ./package.json package-lock.json /app/
+COPY ./bin /app/bin/
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 WORKDIR /app
+
+EXPOSE 3000
+
 CMD ["npm", "run", "start"]

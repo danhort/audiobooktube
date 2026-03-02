@@ -11,7 +11,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const title = formData.get("title") as string;
   const encoder = new TextEncoder();
   const uniqueId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const mediaLocation = process.env.VITE_MEDIA_LOCATION ?? "";
+  const mediaLocation = process.env.VITE_MEDIA_LOCATION ?? "/Media/Audiobooks";
 
   const stream = new ReadableStream({
     start(controller) {
@@ -39,10 +39,11 @@ export const action = async ({ request }: Route.ActionArgs) => {
       });
 
       child.on("error", (err) => {
+        console.error(err);
+
         controller.enqueue(
           encoder.encode(JSON.stringify({ type: "stderr", data: err.message }) + "\n")
         );
-        controller.close();
       });
     },
   });
