@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <header className="py-[20px] border-b mb-[20px]">
           <div className="container">
-            <h1 className="text-2xl">Audiotube</h1>
+            <h1 className="text-2xl">Audiobooktube</h1>
           </div>
         </header>
         {children}
