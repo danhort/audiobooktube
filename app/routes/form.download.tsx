@@ -9,15 +9,19 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   const links = formData.get("links") as string;
   const title = formData.get("title") as string;
+  const author = formData.get("author") as string;
+  const narrator = formData.get("narrator") as string;
   const encoder = new TextEncoder();
-  const uniqueId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const timestamp = Date.now();
   const mediaLocation = process.env.VITE_MEDIA_LOCATION ?? "/Media/Audiobooks";
 
   const stream = new ReadableStream({
     start(controller) {
       const child = spawn("./bin/download.sh", [
-        uniqueId,
+        timestamp.toString(),
         title,
+        author,
+        narrator,
         mediaLocation,
         ...links.split("\n").filter((link) => link.trim() !== ""),
       ]);
@@ -99,18 +103,22 @@ export const DownloadForm = () => {
   };
 
   return (
-    <div className="container">
+    <div>
       <form onSubmit={handleSubmit} className="grid grid-cols-[auto_1fr] gap-[20px]">
         <label htmlFor="link">Links</label>
         <Textarea
           name="links"
           rows={5}
-          placeholder="Enter multiple Youtube links (one per line)"
+          placeholder="Enter multiple video links (one per line)"
           required
         />
         <label htmlFor="title">Title</label>
-        <Input name="title" type="text" placeholder="Replacement title" required />
-        <div className="col-span-2">
+        <Input name="title" type="text" placeholder="Title" required />
+        <label htmlFor="author">Author</label>
+        <Input name="author" type="text" placeholder="Author" required />
+        <label htmlFor="narrator">Narrator</label>
+        <Input name="narrator" type="text" placeholder="Narrator" required />
+        <div className="col-span-2 flex justify-center">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Downloading..." : "Download"}
           </Button>
