@@ -20,6 +20,7 @@ FROM node:20-alpine
 
 RUN apk update && apk add --no-cache \
     bash \
+    findutils \
     build-base python3 py3-pip \
     ffmpeg \
     ca-certificates \
