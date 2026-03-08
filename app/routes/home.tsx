@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { DownloadForm } from "./form.download";
+import { DownloadForm } from "./download";
 
 export function meta({}: Route.MetaArgs) {
   return [

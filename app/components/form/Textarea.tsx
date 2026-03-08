@@ -1,9 +1,16 @@
-import { forwardRef, type Ref } from "react";
+import { forwardRef, type Ref, type TextareaHTMLAttributes } from "react";
+import { twMerge } from "tailwind-merge";
 
 export const Textarea = forwardRef(
-  (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>, ref: Ref<HTMLTextAreaElement>) => {
+  (props: TextareaHTMLAttributes<HTMLTextAreaElement>, ref: Ref<HTMLTextAreaElement>) => {
+    const { className, ...rest } = props;
+
     return (
-      <textarea ref={ref} className="bg-white text-gray-950 w-full py-[2px] px-[10px]" {...props} />
+      <textarea
+        ref={ref}
+        className={twMerge(`bg-white text-gray-950 w-full py-[2px] px-[10px]`, className)}
+        {...rest}
+      />
     );
   }
 );

@@ -1,5 +1,6 @@
 import {
   isRouteErrorResponse,
+  Link,
   Links,
   Meta,
   Outlet,
@@ -34,8 +35,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <header className="py-[20px] border-b mb-[20px]">
-          <div className="container">
-            <h1 className="text-2xl">Audiobooktube</h1>
+          <div className="container flex items-center justify-between">
+            <Link to="/">
+              <h1 className="text-2xl">Audiobooktube</h1>
+            </Link>
+            <Link to="settings" className="i-simple-line-icons-settings">
+              Settings
+            </Link>
           </div>
         </header>
         {children}

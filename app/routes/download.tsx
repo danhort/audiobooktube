@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Input } from "~/components/form/Input";
 import { Button } from "~/components/form/Button";
 import { Textarea } from "~/components/form/Textarea";
+import { Fieldset } from "~/components/form/Fieldset";
+import { Label } from "~/components/form/Label";
 
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
@@ -104,25 +106,34 @@ export const DownloadForm = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="grid grid-cols-[auto_1fr] gap-[20px]">
-        <label htmlFor="link">Links</label>
-        <Textarea
-          name="links"
-          rows={5}
-          placeholder="Enter multiple video links (one per line)"
-          required
-        />
-        <label htmlFor="title">Title</label>
-        <Input name="title" type="text" placeholder="Title" required />
-        <label htmlFor="author">Author</label>
-        <Input name="author" type="text" placeholder="Author" required />
-        <label htmlFor="narrator">Narrator</label>
-        <Input name="narrator" type="text" placeholder="Narrator" required />
-        <div className="col-span-2 flex justify-center">
-          <Button type="submit" disabled={isSubmitting}>
+      <h1>Download</h1>
+      <form onSubmit={handleSubmit}>
+        <Fieldset>
+          <Label htmlFor="link" required>
+            Links
+          </Label>
+          <Textarea
+            name="links"
+            rows={5}
+            placeholder="Enter multiple video links (one per line)"
+            required
+          />
+          <Label htmlFor="title" required>
+            Title
+          </Label>
+          <Input name="title" type="text" placeholder="Title" required />
+          <Label htmlFor="author" required>
+            Author
+          </Label>
+          <Input name="author" type="text" placeholder="Author" required />
+          <Label htmlFor="narrator" required>
+            Narrator
+          </Label>
+          <Input name="narrator" type="text" placeholder="Narrator" required />
+          <Button type="submit" disabled={isSubmitting} className="col-span-2 justify-self-start">
             {isSubmitting ? "Downloading..." : "Download"}
           </Button>
-        </div>
+        </Fieldset>
       </form>
       {output.length ? (
         <div className="p-[20px] border whitespace-pre-line mt-[20px]">

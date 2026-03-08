@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin '@egoist/tailwindcss-icons';
 
 @theme {
   --font-sans:
@@ -13,6 +14,10 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+h1 {
+  @apply text-2xl font-bold mb-[20px];
 }
 
 @utility container {
