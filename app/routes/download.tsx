@@ -6,6 +6,12 @@ import { Button } from "~/components/form/Button";
 import { Textarea } from "~/components/form/Textarea";
 import { Fieldset } from "~/components/form/Fieldset";
 import { Label } from "~/components/form/Label";
+import { getSetting } from "~/model/database";
+import { useLoaderData } from "react-router";
+
+export const loader = async () => {
+  return { mediaLocation: getSetting("mediaLocation") };
+};
 
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
@@ -13,9 +19,9 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const title = formData.get("title") as string;
   const author = formData.get("author") as string;
   const narrator = formData.get("narrator") as string;
+  const mediaLocation = getSetting("mediaLocation") ?? "N/A";
   const encoder = new TextEncoder();
   const timestamp = Date.now();
-  const mediaLocation = process.env.VITE_MEDIA_LOCATION ?? "/Media/Audiobooks";
 
   const stream = new ReadableStream({
     start(controller) {
@@ -59,7 +65,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
   });
 };
 
-export const DownloadForm = () => {
+export default function Download() {
+  const { mediaLocation } = useLoaderData<typeof loader>();
   const [output, setOutput] = useState<{ line: string; type: "log" | "error" }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -69,7 +76,7 @@ export const DownloadForm = () => {
     setOutput([]);
 
     const formData = new FormData(e.currentTarget);
-    const response = await fetch("/form/download", { method: "POST", body: formData });
+    const response = await fetch("/download", { method: "POST", body: formData });
 
     if (!response.body) {
       setIsSubmitting(false);
@@ -105,7 +112,7 @@ export const DownloadForm = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Download</h1>
       <form onSubmit={handleSubmit}>
         <Fieldset>
@@ -130,6 +137,8 @@ export const DownloadForm = () => {
             Narrator
           </Label>
           <Input name="narrator" type="text" placeholder="Narrator" required />
+          <Label htmlFor="mediaLocation">Media Location</Label>
+          <span>{mediaLocation ?? "N/A"}</span>
           <Button type="submit" disabled={isSubmitting} className="col-span-2 justify-self-start">
             {isSubmitting ? "Downloading..." : "Download"}
           </Button>
@@ -144,4 +153,4 @@ export const DownloadForm = () => {
       ) : null}
     </div>
   );
-};
+}

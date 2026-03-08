@@ -7,7 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
+import { Toaster } from "react-hot-toast";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -34,10 +34,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <Toaster position="bottom-center" />
         <header className="py-[20px] border-b mb-[20px]">
           <div className="container flex items-center justify-between">
             <Link to="/">
-              <h1 className="text-2xl">Audiobooktube</h1>
+              <span className="text-2xl">Audiobooktube</span>
             </Link>
             <Link to="settings" className="i-simple-line-icons-settings">
               Settings
