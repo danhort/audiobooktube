@@ -24,6 +24,7 @@ combine() {
   author=$3
   narrator=$4
   path="data/tmp/$timestamp"
+  complete_path="data/complete/$timestamp"
 
   echo "Combining files for title: $path/$title"
 
@@ -34,6 +35,8 @@ combine() {
   echo "narrator=$narrator" >> $path/chapters_metadata.txt
 
   partEnd=0
+
+  mkdir -p $complete_path
 
   for partPath in $path/part*; do
     mapfile -d '' files < <(find $partPath/*.m4a -maxdepth 1 -type f -printf '%f\0' | sort -zV)
@@ -61,11 +64,12 @@ combine() {
   done
 
   ffmpeg -loglevel error -f concat -safe 0 -i $path/filelist.txt -c copy "$path/$title.m4a" -y
-  ffmpeg -loglevel error -i "$path/$title.m4a" -i $path/chapters_metadata.txt -map_metadata 1 -c copy "data/complete/$title.m4b" -y
+  ffmpeg -loglevel error -i "$path/$title.m4a" -i $path/chapters_metadata.txt -map_metadata 1 -c copy "$complete_path/$title.m4b" -y
 }
 
 download $timestamp "${links[@]}"
 combine $timestamp "$title" "$author" "$narrator"
 
 rm -rf "data/tmp/$timestamp"
-mv "data/complete/$title.m4b" "$media_location/$title/$title.m4b"
+mkdir -p "$media_location/$title"
+mv "$complete_path/$title.m4b" "$media_location/$title/$title.m4b"

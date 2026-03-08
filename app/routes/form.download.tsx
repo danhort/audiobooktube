@@ -127,9 +127,7 @@ export const DownloadForm = () => {
       {output.length ? (
         <div className="p-[20px] border whitespace-pre-line mt-[20px]">
           {output.map((outputLine) => (
-            <span className={outputLine.type === "error" ? "text-red-500" : ""}>
-              {outputLine.line}
-            </span>
+            <span>{outputLine.line}</span>
           ))}
         </div>
       ) : null}
