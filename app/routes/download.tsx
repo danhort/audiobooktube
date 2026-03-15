@@ -10,7 +10,7 @@ import { getSetting } from "~/model/database";
 import { useLoaderData } from "react-router";
 
 export const loader = async () => {
-  return { mediaLocation: getSetting("mediaLocation") };
+  return { mediaDestination: getSetting("mediaDestination") };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -19,7 +19,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const title = formData.get("title") as string;
   const author = formData.get("author") as string;
   const narrator = formData.get("narrator") as string;
-  const mediaLocation = getSetting("mediaLocation") ?? "N/A";
+  const mediaDestination = getSetting("mediaDestination") ?? "N/A";
   const encoder = new TextEncoder();
   const timestamp = Date.now();
 
@@ -30,7 +30,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         title,
         author,
         narrator,
-        mediaLocation,
+        mediaDestination,
         ...links.split("\n").filter((link) => link.trim() !== ""),
       ]);
 
@@ -66,7 +66,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
 };
 
 export default function Download() {
-  const { mediaLocation } = useLoaderData<typeof loader>();
+  const { mediaDestination } = useLoaderData<typeof loader>();
   const [output, setOutput] = useState<{ line: string; type: "log" | "error" }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -137,8 +137,8 @@ export default function Download() {
             Narrator
           </Label>
           <Input name="narrator" type="text" placeholder="Narrator" required />
-          <Label htmlFor="mediaLocation">Media Location</Label>
-          <span>{mediaLocation ?? "N/A"}</span>
+          <Label htmlFor="mediaDestination">Media Destination</Label>
+          <span>{mediaDestination ?? "N/A"}</span>
           <Button type="submit" disabled={isSubmitting} className="col-span-2 justify-self-start">
             {isSubmitting ? "Downloading..." : "Download"}
           </Button>

@@ -1,6 +1,6 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["Audiobooktube", "audiotube"],
+  "cSpell.words": ["Audiobooktube"],
   "editor.tabSize": 2
 }

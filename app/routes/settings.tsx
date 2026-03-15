@@ -15,8 +15,8 @@ export const loader = async () => {
 
 export const action = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
-  const mediaLocation = formData.get("mediaLocation") as string;
-  setSetting("mediaLocation", mediaLocation);
+  const mediaDestination = formData.get("mediaDestination") as string;
+  setSetting("mediaDestination", mediaDestination);
 
   return { success: true };
 };
@@ -26,10 +26,9 @@ export default function Settings() {
   const navigation = useNavigation();
   const actionData = useActionData();
 
-  const [mediaLocation, setMediaLocation] = useState(() => {
-    const mediaLocationSetting = settings.find((setting) => setting.key === "mediaLocation");
-    return mediaLocationSetting ? mediaLocationSetting.value : "";
-  });
+  const [mediaDestination, setmediaDestination] = useState(
+    settings.find((setting) => setting.key === "mediaDestination")?.value ?? ""
+  );
 
   useEffect(() => {
     if (actionData?.success) {
@@ -42,12 +41,12 @@ export default function Settings() {
       <h1>Settings</h1>
       <Form method="post">
         <Fieldset>
-          <Label htmlFor="mediaLocation">Media Location</Label>
+          <Label htmlFor="mediaDestination">Media Location</Label>
           <Input
-            name="mediaLocation"
+            name="mediaDestination"
             type="text"
-            value={mediaLocation}
-            onChange={(e) => setMediaLocation(e.target.value)}
+            value={mediaDestination}
+            onChange={(e) => setmediaDestination(e.target.value)}
           />
           <Button
             type="submit"
