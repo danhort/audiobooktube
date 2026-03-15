@@ -7,6 +7,7 @@ export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   return defineConfig({
+    envPrefix: "ABT_",
     server: {
       port: Number(env.PORT) || 3000,
     },

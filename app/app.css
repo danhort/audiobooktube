@@ -17,7 +17,7 @@ body {
 }
 
 h1 {
-  @apply text-2xl font-bold mb-[20px];
+  @apply text-2xl mb-[20px];
 }
 
 @utility container {

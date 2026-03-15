@@ -6,11 +6,12 @@ import { Button } from "~/components/form/Button";
 import { Textarea } from "~/components/form/Textarea";
 import { Fieldset } from "~/components/form/Fieldset";
 import { Label } from "~/components/form/Label";
-import { getSetting } from "~/model/database";
 import { useLoaderData } from "react-router";
 
+const DEFAULT_MEDIA_DESTINATION = "/media/audiobooks";
+
 export const loader = async () => {
-  return { mediaDestination: getSetting("mediaDestination") };
+  return { mediaDestination: import.meta.env.ABT_MEDIA_DESTINATION };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {
@@ -19,7 +20,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   const title = formData.get("title") as string;
   const author = formData.get("author") as string;
   const narrator = formData.get("narrator") as string;
-  const mediaDestination = getSetting("mediaDestination") ?? "N/A";
+  const mediaDestination = import.meta.env.ABT_MEDIA_DESTINATION ?? DEFAULT_MEDIA_DESTINATION;
   const encoder = new TextEncoder();
   const timestamp = Date.now();
 
@@ -65,7 +66,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
   });
 };
 
-export default function Download() {
+export function DownloadForm() {
   const { mediaDestination } = useLoaderData<typeof loader>();
   const [output, setOutput] = useState<{ line: string; type: "log" | "error" }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,7 +77,7 @@ export default function Download() {
     setOutput([]);
 
     const formData = new FormData(e.currentTarget);
-    const response = await fetch("/download", { method: "POST", body: formData });
+    const response = await fetch("/form/download", { method: "POST", body: formData });
 
     if (!response.body) {
       setIsSubmitting(false);
@@ -112,8 +113,7 @@ export default function Download() {
   };
 
   return (
-    <div className="container">
-      <h1>Download</h1>
+    <>
       <form onSubmit={handleSubmit}>
         <Fieldset>
           <Label htmlFor="link" required>
@@ -137,8 +137,12 @@ export default function Download() {
             Narrator
           </Label>
           <Input name="narrator" type="text" placeholder="Narrator" required />
-          <Label htmlFor="mediaDestination">Media Destination</Label>
-          <span>{mediaDestination ?? "N/A"}</span>
+          {mediaDestination ? (
+            <>
+              <Label htmlFor="mediaDestination">Media Destination</Label>
+              <span>{mediaDestination}</span>
+            </>
+          ) : null}
           <Button type="submit" disabled={isSubmitting} className="col-span-2 justify-self-start">
             {isSubmitting ? "Downloading..." : "Download"}
           </Button>
@@ -151,6 +155,6 @@ export default function Download() {
           ))}
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

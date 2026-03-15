@@ -4,6 +4,7 @@ timestamp=$1
 title=$2
 author=$3
 narrator=$4
+mediaDestination=$5
 links=("${@:6}")
 
 download() {
@@ -15,8 +16,9 @@ download() {
   for LINK in "${links[@]}"; do
     yt-dlp -x --audio-format m4a --js-runtimes node --split-chapters \
       -P "data/tmp/$timestamp" \
-      -o "chapter:chapters/part$part/%(section_number)s-%(section_start)s-%(section_end)s-%(section_title)s.%(ext)s" \
+      -o "chapter:part$part/chapters/%(section_number)s-%(section_start)s-%(section_end)s-%(section_title)s.%(ext)s" \
       -o "part$part/$title.%(ext)s" $LINK
+
     ((part++))
   done
 }
@@ -27,9 +29,9 @@ combine() {
   author=$3
   narrator=$4
   path="data/tmp/$timestamp"
-  complete_path="data/complete/$timestamp"
+  completePath=data/complete/$timestamp
 
-  echo "Combining files for title: $path/$title"
+  echo "Combining files for title: $title"
 
   touch $path/filelist.txt
   echo ";FFMETADATA1" > $path/metadata.txt
@@ -39,10 +41,10 @@ combine() {
 
   partEnd=0
 
-  mkdir -p $complete_path
+  mkdir -p $completePath
 
-  for partPath in $path/chapters/part*; do
-    mapfile -d '' files < <(find $partPath/*.m4a -maxdepth 1 -type f -printf '%f\0' | sort -zV)
+  for partPath in $path/part*; do
+    mapfile -d '' files < <(find $partPath/chapters/*.m4a -maxdepth 1 -type f -printf '%f\0' | sort -zV)
 
     for file in "${files[@]}"; do
       partName=$(basename "$partPath")
@@ -60,28 +62,29 @@ combine() {
       echo "START=$start" >> $path/metadata.txt
       echo "END=$end" >> $path/metadata.txt
       echo "title=$chapter_title" >> $path/metadata.txt
-      printf "file '%s'\n" "chapters/$partName"/"$filename.m4a" >> $path/filelist.txt;
+      printf "file '%s'\n" "$partName"/chapters/"$filename.m4a" >> $path/filelist.txt;
     done
 
     partEnd=$(echo "scale=2; $partEnd + $end" | bc)
-  done
 
-  # If filelist.txt is empty, populate it with the files in the part directories
-  if [ ! -s $path/filelist.txt ]; then
-    for partPath in $path/part*; do
+    # if chapter folder does not exist, add the part file directly to the filelist
+    if [ ! -d $partPath/chapters ]; then
       for file in $partPath/*.m4a; do
         partName=$(basename "$partPath")
         filename=$(basename "$file" .m4a)
         echo "file '$partName/$filename.m4a'" >> $path/filelist.txt
       done
-    done
-  fi
+    fi
+  done
 
-  ffmpeg -loglevel error -f concat -safe 0 -i $path/filelist.txt -c copy "$path/$title.m4a" -y
-  ffmpeg -loglevel error -i "$path/$title.m4a" -i $path/metadata.txt -map_metadata 1 -c copy "$complete_path/$title.m4b" -y
+  ffmpeg -loglevel error -f concat -safe 0 -i $path/filelist.txt -c copy $path/"$title".m4a -y
+  ffmpeg -loglevel error -i $path/"$title".m4a -i $path/metadata.txt -map_metadata 1 -c copy $completePath/"$title".m4b -y
 }
 
 download $timestamp "$title" "${links[@]}"
 combine $timestamp "$title" "$author" "$narrator"
 
-# rm -rf "data/tmp/$timestamp"
+rm -rf "data/tmp/$timestamp"
+mkdir -p "$mediaDestination"/"$title"
+cp data/complete/$timestamp/"$title".m4b "$mediaDestination"/"$title"/"$title.m4b"
+echo "Download and combination complete for title: $title"
