@@ -1,5 +1,3 @@
-import { spawn } from "node:child_process";
-import type { Route } from "../+types/root";
 import { useState } from "react";
 import { Input } from "~/components/form/Input";
 import { Button } from "~/components/form/Button";
@@ -23,6 +21,7 @@ export function DownloadForm() {
   let eventSource: EventSource | null = null;
 
   const [progress, setProgress] = useState({
+    status: "",
     percent: 0,
     speed: "0 KB/s",
     eta: "0s",
@@ -46,7 +45,12 @@ export function DownloadForm() {
         eventSource?.close();
         setIsDownloading(false);
       } else {
-        setProgress({ percent: data.percent, speed: data.speed, eta: data.eta });
+        setProgress({
+          status: data.status,
+          percent: data.percent,
+          speed: data.speed,
+          eta: data.eta,
+        });
       }
     };
 
@@ -63,35 +67,23 @@ export function DownloadForm() {
           <Label htmlFor="link" required>
             Link
           </Label>
-          <Input
-            name="links[]"
-            type="text"
-            placeholder="Link"
-            required
-            value="https://youtu.be/thHmc9GOYmY?si=d5bxP2wV5qO-pYmw"
-          />
+          <Input name="links[]" type="text" placeholder="Link" required value="" />
           <Label htmlFor="link" required>
             Link
           </Label>
-          <Input
-            name="links[]"
-            type="text"
-            placeholder="Link"
-            required
-            value="https://youtu.be/thHmc9GOYmY?si=d5bxP2wV5qO-pYmw"
-          />
+          <Input name="links[]" type="text" placeholder="Link" required value="" />
           <Label htmlFor="title" required>
             Title
           </Label>
-          <Input name="title" type="text" placeholder="Title" required value="test" />
+          <Input name="title" type="text" placeholder="Title" required value="" />
           <Label htmlFor="author" required>
             Author
           </Label>
-          <Input name="author" type="text" placeholder="Author" required value="test" />
+          <Input name="author" type="text" placeholder="Author" required value="" />
           <Label htmlFor="narrator" required>
             Narrator
           </Label>
-          <Input name="narrator" type="text" placeholder="Narrator" required value="test" />
+          <Input name="narrator" type="text" placeholder="Narrator" required value="" />
           <Label htmlFor="mediaDestination" required>
             Media Destination
           </Label>
@@ -108,6 +100,7 @@ export function DownloadForm() {
       </form>
       <div>
         <h2>Progress</h2>
+        <p>{progress.status}</p>
         <p>{progress.percent}%</p>
         <p>Speed: {progress.speed}</p>
         <p>ETA: {progress.eta}</p>
