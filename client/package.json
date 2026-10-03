@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.9.2",
-    "@iconify-json/simple-line-icons": "^1.2.1",
+    "@iconify-json/material-symbols": "^1.2.79",
     "@react-router/dev": "7.16.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/better-sqlite3": "^7.6.13",

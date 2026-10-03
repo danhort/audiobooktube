@@ -1,8 +1,7 @@
 import queue
 import threading
-from flask import Flask, request, Response, stream_with_context
+from flask import Flask, jsonify, request, Response, stream_with_context
 import yt_dlp
-import time
 from flask_cors import CORS
 from pathlib import Path
 import subprocess
@@ -39,22 +38,22 @@ def start_downloads(client_id: str):
     author = request.form.get("author", type=str)
     narrator = request.form.get("narrator", type=str)
     media_destination = request.form.get("mediaDestination", type=str)
-    timestamp = int(time.time())
-    temp_dir_path = Path(f"data/tmp/{timestamp}")
+    temp_dir_path = Path(f"data/tmp/{client_id}")
 
     if not links:
-        return "Missing required field: links", 400
+        return jsonify({"error": "Missing required field: links"}), 400
     if not title:
-        return "Missing required field: title", 400
+        return jsonify({"error": "Missing required field: title"}), 400
     if not author:
-        return "Missing required field: author", 400
+        return jsonify({"error": "Missing required field: author"}), 400
     if not narrator:
-        return "Missing required field: narrator", 400
+        return jsonify({"error": "Missing required field: narrator"}), 400
     if not media_destination:
-        return "Missing required field: mediaDestination", 400
+        return jsonify({"error": "Missing required field: mediaDestination"}), 400
 
-    destination_dir_path = Path(media_destination)
+    destination_dir_path = Path(f"{media_destination}/{client_id}")
     destination_dir_path.mkdir(parents=True, exist_ok=True)
+    temp_dir_path.mkdir(parents=True, exist_ok=True)
 
     def run_downloads():
         download_audio(links, title, client_id, temp_dir_path)
@@ -79,29 +78,37 @@ def start_downloads(client_id: str):
 
         # Send completion message
         if client_id in client_queues:
-            client_queues[client_id].put("data: {\"percent\": 100, \"status\": \"complete\"}\n\n")
+            client_queues[client_id].put("data: {\"status\": \"complete\", \"message\": \"Complete\"}\n\n")
 
     # Start the download in a background thread so the SSE stream isn't blocked
     threading.Thread(target=run_downloads).start()
     return {"status": "started", "client_id": client_id}
 
 def progress_hook(d, client_id: str):
-    if d['status'] == 'downloading':
-        total = d.get('total_bytes') or d.get('total_bytes_estimate')
-        downloaded = d.get('downloaded_bytes', 0)
-        percent = (downloaded / total * 100) if total else 0
-        speed = d.get('speed', 'N/A')
-        eta = d.get('eta', 'N/A')
-        message = f"data: {{\"percent\": {percent:.2f}, \"speed\": \"{speed}\", \"eta\": \"{eta}\"}}\n\n"
+    status = d['status']
+    message = ""
 
-        if client_id in client_queues:
-            client_queues[client_id].put(message)
-    else:
-        # Send status updates for other events (e.g., finished, error)
-        message = f"data: {{\"status\": \"{d['status']}\"}}\n\n"
+    if status == 'downloading':
+        # Log frequent fragment download updates
+        filename = d.get('filename')
+        downloaded_bytes = d.get('downloaded_bytes', 0)
+        total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
 
-        if client_id in client_queues:
-            client_queues[client_id].put(message)
+        # Calculate percentage if total size is known
+        percentage = (downloaded_bytes / total_bytes * 100) if total_bytes else 0
+        speed = d.get('speed', 0) # bytes/second
+        eta = d.get('eta', 0)     # seconds
+
+        message = f"Downloading: {filename} | {percentage:.1f}% complete | Speed: {speed} B/s | ETA: {eta}s"
+
+    elif status == 'finished':
+        message = f"Finished downloading file: {d.get('filename')}"
+
+    elif status == 'error':
+        message="An error occurred during download."
+
+    if client_id in client_queues:
+        client_queues[client_id].put(f"data: {{\"status\": \"{status}\", \"message\": \"{message}\"}}\n\n")
 
 def generate_options(title: str, path: str, client_id: str):
     return {
